@@ -1,14 +1,18 @@
 # Lab1 实验报告
 
 本次实验实现了一个系统调用跟踪的功能，主要包含三个核心操作：
+
 1. **内存读取功能**（当 `trace_request = 0`）：通过 `read_volatile` 安全地读取指定内存地址的值，然后返回读取到的 `u8` 类型数据。此功能允许用户态程序监控特定内存位置的变化。
 2. **内存写入功能**（当 `trace_request = 1`）：使用 `write_volatile` 向指定内存地址写入数据，这个操作用于测试内存修改场景。
 3. **系统调用统计查询**（当 `trace_request = 2`）：通过访问 `TASK_MANAGER` 中的 `syscall_counts` 数组，查询特定系统调用的调用次数并打印调试信息。
 
 ## 问答题
 
-> 1、正确进入 U 态后，程序的特征还应有：使用 S 态特权指令，访问 S 态寄存器后会报错。 请同学们可以自行测试这些内容（运行 三个 bad 测例 (ch2b_bad_*.rs) ）， 描述程序出错行为，同时注意注明你使用的 sbi 及其版本。
+> 1、正确进入 U 态后，程序的特征还应有：使用 S 态特权指令，访问 S 态寄存器后会报错。 请同学们可以自行测试这些内容（运行 三个 bad 测例 (ch2b*bad*\*.rs) ）， 描述程序出错行为，同时注意注明你使用的 sbi 及其版本。
 
+- `ch2b_bad_address.rs`：[kernel] PageFault in application, bad addr = 0x0, bad instruction = 0x804003c8, kernel killed it.
+- `ch2b_bad_instructions.rs`：[kernel] IllegalInstruction in application, kernel killed it.
+- `ch2b_bad_register.rs`：[kernel] IllegalInstruction in application, kernel killed it.
 
 > 2、深入理解 `trap.S` 中两个函数 `__alltraps` 和 `__restore` 的作用，并回答如下问题:
 
@@ -17,6 +21,7 @@
 刚进入 `__restore` 时，`sp` 代表内核栈顶。
 
 `__restore` 的两种使用情景：
+
 1. 从 S 态进入 U 态
 2. 从 S 态进入 S 态
 
@@ -34,9 +39,9 @@
 > 2.4 L60：该指令之后，`sp` 和 `sscratch` 中的值分别有什么意义？
 
 这条指令用于交换 `sscratch` 和 `sp` 寄存器的值。交换之后：
+
 - `sp` -> 用户栈
 - `sscratch` -> 内核栈
-
 
 > 2.5 `__restore`：中发生状态切换在哪一条指令？为何该指令执行之后会进入用户态？
 
@@ -44,16 +49,16 @@
 
 `sstatus` 的 `SPP` 位恢复了用户态特权级值，`sret` 会根据 `sstatus` 中的 `SPP` 位来决定返回特权级。
 
-
 > 2.6 L13：该指令之后，sp 和 sscratch 中的值分别有什么意义？
+
 ```armasm
 csrrw sp, sscratch, sp
 ```
 
 这条指令用于交换 `sscratch` 和 `sp` 寄存器的值。交换之后：
+
 - `sp` -> 内核栈
 - `sscratch` -> 用户栈
-
 
 > 2.7 从 U 态进入 S 态是哪一条指令发生的？
 
